@@ -1,0 +1,51 @@
+/*
+Antón Vázquez López anton.vazquez.lopez@udc.es
+Manuel Taibo González manuel.taibo2@udc.es
+*/
+
+#ifndef LIST_H
+#define LIST_H
+
+#include <stdbool.h>
+
+typedef struct Nodo {
+    char *comando;
+    struct Nodo *siguiente;
+} Nodo;
+
+typedef struct Lista{
+    Nodo *primero;
+    int tamaño;
+} Lista;
+
+typedef struct NodoArchivo {
+    int descriptor;
+    char *nombre;
+    int modo;
+    struct NodoArchivo *siguiente;
+} NodoArchivo;
+
+typedef struct ListaArchivos{
+    NodoArchivo *primero;
+} ListaArchivos;
+
+int TrocearCadena(char *cadena, char *trozos[]);
+
+void InicializarLista (Lista *lista);
+void InicializarListaArchivos (ListaArchivos *lista);
+bool CrearNodo (Nodo **nuevoNodo, char *comando);
+bool CrearNodoArchivo(NodoArchivo **nuevoNodo, const char *nombre, int descriptor, int modo);
+void AgregarComando (Lista *lista, char *comando);
+void AgregarArchivo(ListaArchivos *lista, const char *nombre, int descriptor, int modo);
+void ImprimirComandos (Lista lista);
+void ImprimirComandoN(Lista lista, int Ncomando);
+void ImprimirComandoMN(Lista lista, int Ncomando);
+void ListarFicherosAbiertos(ListaArchivos *lista);
+void EliminarDeFicherosAbiertos (ListaArchivos *lista, int descriptor);
+char* NombreFicheroDescriptor(int descriptor, ListaArchivos *lista);
+void LiberarLista (Lista *Lista);
+void LiberarListaArchivos(ListaArchivos *lista);
+void EliminarNodo (Lista *Lista, int position);
+
+
+#endif
