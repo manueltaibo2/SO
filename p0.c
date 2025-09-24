@@ -37,6 +37,7 @@ cmd_definition commands[] = {
   {"bye", cmd_exit},
   {"date", cmd_date},
   {"hour", cmd_hour},
+  {"historic",(cmd_handler)cmd_historic},
   {"open", (cmd_handler)cmd_open},      //REVISAR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   {"close", (cmd_handler)cmd_close},
   {"dup", (cmd_handler)cmd_dup},
@@ -145,6 +146,26 @@ void cmd_hour(char *trozos[]){
 
   strftime(hora, sizeof(hora), "%H:%M:%S", Fjunta);
   printf("Hora: %s\n", hora);
+}
+void cmd_historic(Lista *lista, char *args[]) {
+    if (args[1] == NULL) {
+        // Caso: historic -> imprimir todos
+        ImprimirComandos(*lista);
+    } else if (strcmp(args[1], "-count") == 0) {
+        printf("Número de comandos en histórico: %d\n", lista->tamaño);
+    } else if (strcmp(args[1], "-clear") == 0) {
+        LiberarLista(lista);
+        printf("Histórico borrado.\n");
+    } else {
+        int n = atoi(args[1]);
+        if (n >= 0) {
+            // historic N -> repetir el comando número N
+            ImprimirComandoN(*lista, n);
+        } else {
+            // historic -N -> imprimir últimos N comandos
+            ImprimirComandoMN(*lista, -n);
+        }
+    }
 }
 
 void cmd_open(char * trozos[], ListaArchivos *lista){
