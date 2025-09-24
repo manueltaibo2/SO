@@ -29,6 +29,8 @@ typedef struct{
 cmd_definition commands[] = {
   {"authors", cmd_authors},
   {"getpid", cmd_getpid},
+  {"getcwd", cmd_getcwd},
+  {"chdir", cmd_chdir},
   {"exit", cmd_exit},
   {"quit", cmd_exit},
   {"bye", cmd_exit},
@@ -54,6 +56,8 @@ void processInput (char* tokens[]){
   }
 }
 
+
+//funciones P0
 void cmd_authors (char* trozos[]){
   //print("Authors ejecutado\n");
   if (trozos[1] == NULL){
@@ -68,7 +72,39 @@ void cmd_authors (char* trozos[]){
   }
   
 void cmd_getpid ( char* trozos[]){
-  printf("Mi PID es : me lo invento\n");
+  if (trozos[1] == NULL){
+    pid_t pid = getpid();
+    printf("Identificador proceso: %d\n", pid);
+  } else if (strcmp(trozos[1], "-p") == 0){
+    pid_t pid = getppid();
+    printf("Identificador proceso padre: %d\n", pid);
+  } else {
+    printf("Opción no válida para 'getpid'.\n");
+  }
+}
+
+void cmd_getcwd ( char* trozos[]){
+  char dir[MAX_TOKENS];
+
+  if (trozos[1] == NULL){
+    getcwd(dir, sizeof(dir));
+    printf("Directorio actual: %s\n", dir);
+  } else {
+    printf("Opción no válida para 'getcwd'.\n");
+  }
+}
+
+void cmd_chdir ( char* trozos[]){
+  char dir[MAX_TOKENS];
+
+  if (trozos[1] == NULL){
+    cmd_getcwd(trozos);
+  } else if (trozos[1] != NULL) {
+    chdir(trozos[1]);
+    printf("Se ha cambiado el directorio actual a: %s\n", trozos[1]);
+  } else {
+    printf("Opción no válida para 'chdir'.\n");
+  }
 }
   
 void cmd_date (char* trozos[]){
@@ -96,6 +132,8 @@ void cmd_date (char* trozos[]){
 void cmd_exit(char* tr[]){
   exit(0);
   }
+
+
 
 
 
