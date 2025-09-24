@@ -16,6 +16,7 @@ void cmd_chdir ( char* trozos[]);
 void cmd_exit (char* trozos[]);
 void cmd_date (char* trozos[]);
 void cmd_hour(char *trozos[]);
+void cmd_historic(Lista *lista, char *args[])
 void cmd_open (char * trozos[], ListaArchivos *lista);
 void cmd_close (char * trozos[], ListaArchivos *lista);
 void cmd_dup(char *trozos[], ListaArchivos *lista);
