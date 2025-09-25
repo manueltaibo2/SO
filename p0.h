@@ -22,6 +22,6 @@ void cmd_close (char * trozos[], ListaArchivos *lista);
 void cmd_dup(char *trozos[], ListaArchivos *lista);
 void cmd_listopen(ListaArchivos *lista);
 void cmd_infosys();
-void cmd_help(char *command);
+void cmd_help(char *trozos[]);
 
 #endif
