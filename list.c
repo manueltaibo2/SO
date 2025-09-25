@@ -67,13 +67,15 @@ void AgregarComando (Lista *lista, char *comando) {
         return;
     }
 
-    if (lista->primero == NULL) lista->primero = nuevoNodo;
-    else {
-        Nodo *aux = lista->primero;
-        while (aux->siguiente!=NULL) aux = aux->siguiente;
-        aux->siguiente = nuevoNodo;
-        lista->tamaño++;
-    }
+  if (lista->primero == NULL) {
+    lista->primero = nuevoNodo;
+    lista->tamaño++;
+  } else {
+    Nodo *aux = lista->primero;
+    while (aux->siguiente!=NULL) aux = aux->siguiente;
+    aux->siguiente = nuevoNodo;
+    lista->tamaño++;
+  }
 }
 
 void AgregarArchivo(ListaArchivos *lista, const char *nombre, int descriptor, int modo) {
