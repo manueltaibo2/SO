@@ -80,7 +80,7 @@ void cmd_authors (char* trozos[]){
       printf("Opción no válida para 'authors'.\n");
     }
   }
-  
+
 void cmd_getpid ( char* trozos[]){
   if (trozos[1] == NULL){
     pid_t pid = getpid();
@@ -116,7 +116,7 @@ void cmd_chdir ( char* trozos[]){
     printf("Opción no válida para 'chdir'.\n");
   }
 }
-  
+
 void cmd_date (char* trozos[]){
     time_t aux;
     struct tm *Fjunta;
@@ -128,7 +128,7 @@ void cmd_date (char* trozos[]){
 
     strftime(fecha, sizeof(fecha), "%d/%m/%Y", Fjunta);
     strftime(hora, sizeof(hora), "%H:%M:%S", Fjunta);
-    
+
     if (trozos[1] == NULL){
         printf("Fecha: %s\n", fecha);
     printf("Hora: %s\n", hora);
@@ -147,17 +147,18 @@ void cmd_hour(char *trozos[]){
   strftime(hora, sizeof(hora), "%H:%M:%S", Fjunta);
   printf("Hora: %s\n", hora);
 }
-void cmd_historic(Lista *lista, char *args[]) {
-    if (args[1] == NULL) {
+
+void cmd_historic(Lista *lista, char *trozos[]) {
+    if (trozos[1] == NULL) {
         // Caso: historic -> imprimir todos
         ImprimirComandos(*lista);
-    } else if (strcmp(args[1], "-count") == 0) {
+    } else if (strcmp(trozos[1], "-count") == 0) {
         printf("Número de comandos en histórico: %d\n", lista->tamaño);
-    } else if (strcmp(args[1], "-clear") == 0) {
+    } else if (strcmp(trozos[1], "-clear") == 0) {
         LiberarLista(lista);
         printf("Histórico borrado.\n");
     } else {
-        int n = atoi(args[1]);
+        int n = atoi(trozos[1]);
         if (n >= 0) {
             // historic N -> repetir el comando número N
             ImprimirComandoN(*lista, n);
@@ -194,7 +195,7 @@ void cmd_open(char * trozos[], ListaArchivos *lista){
   }
 
   AgregarArchivo(lista, trozos[1], df, mode);
-  printf("Archivo abierto: %s\nDescriptor: %d", trozos[1], df);
+  printf("Archivo abierto: %s, Descriptor: %d\n", trozos[1], df);
 
 }
 
@@ -320,7 +321,10 @@ int main(){
   char* tokens[MAX_TOKENS];
   char* result;
 
+  Lista listaComandos;
   ListaArchivos listaArchivos;
+
+  InicializarLista(&listaComandos);
   InicializarListaArchivos(&listaArchivos);
 
   bool finished = false;
@@ -331,11 +335,14 @@ int main(){
     if(result == NULL){
       finished = true;
     } else {
+      AgregarComando(&listaComandos, buffer);
       TrocearCadena(buffer, tokens);
 
       // Verificar qué tipo de comando es
       if (tokens[0] != NULL) {
-        if (strcmp(tokens[0], "open") == 0) {
+        if (strcmp(tokens[0], "historic") == 0) {
+          cmd_historic(&listaComandos, tokens);
+        } else if (strcmp(tokens[0], "open") == 0) {
           cmd_open(tokens, &listaArchivos);
         } else if (strcmp(tokens[0], "close") == 0) {
           cmd_close(tokens, &listaArchivos);
@@ -350,7 +357,7 @@ int main(){
       }
     }
   }
-
+  LiberarLista(&listaComandos);
   LiberarListaArchivos(&listaArchivos);
   return 0;
 }
