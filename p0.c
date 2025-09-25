@@ -161,7 +161,7 @@ void cmd_historic(Lista *lista, char *trozos[]) {
         int n = atoi(trozos[1]);
         if (n >= 0) {
             // historic N -> repetir el comando número N
-            ImprimirComandoN(*lista, n);
+            ImprimirComandoN(*lista, n-1); // -1 porque la lista empieza en 0
         } else {
             // historic -N -> imprimir últimos N comandos
             ImprimirComandoMN(*lista, -n);
