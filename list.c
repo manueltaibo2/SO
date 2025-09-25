@@ -91,7 +91,7 @@ void AgregarArchivo(ListaArchivos *lista, const char *nombre, int descriptor, in
         aux->siguiente = nuevoNodo;
     }
 
-    printf("Archivo agregado: Descriptor: %d, Nombre: %s, Modo: %d\n", descriptor, nombre, modo);
+    //printf("Archivo agregado: Descriptor: %d, Nombre: %s, Modo: %d\n", descriptor, nombre, modo);
 }
 
 void ImprimirComandos(Lista lista) {
@@ -105,14 +105,13 @@ void ImprimirComandos(Lista lista) {
     return;
   }
 
-  printf("Comandos:\n");
   while (aux!=NULL) {
     copia = (char*) malloc(strlen(aux->comando)+1);
     strcpy(copia, aux->comando);
 
     numTrozos = TrocearCadena(copia, trozos);
     for (int i=0; i<numTrozos; i++) {
-      printf("%s\n", trozos[i]);
+      printf("%s ", trozos[i]);
     }
     printf("\n--------\n");
     free(copia);
@@ -120,7 +119,7 @@ void ImprimirComandos(Lista lista) {
   }
 }
 
-void ImprimirComandosN (Lista lista, int nComando){
+void ImprimirComandoN (Lista lista, int nComando){
   if(nComando>=lista.tamaño){
     printf("No existe el comando con número %d\n", nComando);
     return;
@@ -139,10 +138,11 @@ void ImprimirComandosN (Lista lista, int nComando){
   copia = (char*) malloc(strlen(aux->comando)+1);
   strcpy(copia, aux->comando);
   numTrozos = TrocearCadena(copia, trozos);
+  printf("\t");
   for (int i=0; i<numTrozos; i++) {
-    printf("%s\n", trozos[i]);
+    printf("%s ", trozos[i]);
   }
-  printf("\n--------\n");
+  puts("");
   free(copia);
   aux = aux->siguiente;
 }
@@ -168,10 +168,11 @@ void ImprimirComandoMN(Lista lista, int Ncomando) {
           strcpy(copia, aux->comando);
 
           num_trozos = TrocearCadena(copia, trozos);
+          printf("\t");
           for(int j = 0; j < num_trozos; j++){  //Imprime los trozos
-              printf(" %s ", trozos[j]);
+              printf("%s ", trozos[j]);
           }
-          printf("\n-------------------\n");
+		  puts("");
           aux = aux->siguiente;
           free(copia);
         }
@@ -218,7 +219,7 @@ void EliminarDeFicherosAbiertos (ListaArchivos *lista, int descriptor){
 
   free(aux->nombre);
   free(aux);
-  printf("El archivo con descriptor %d ha sido eliminado\n", descriptor);
+  //printf("El archivo con descriptor %d ha sido eliminado\n", descriptor);
 }
 
 char* NombreFicheroDescriptor(int descriptor, ListaArchivos *lista){
@@ -238,7 +239,7 @@ void LiberarLista(Lista *lista){
     sig = aux->siguiente;
     free(aux->comando);
     free(aux);
-    aux = sig->siguiente;
+    aux = sig;
   }
 
   InicializarLista(lista);
