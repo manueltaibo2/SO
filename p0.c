@@ -43,7 +43,7 @@ cmd_definition commands[] = {
   {"dup", (cmd_handler)cmd_dup},
   {"listopen", (cmd_handler)cmd_listopen},
   {"infosys", cmd_infosys},
-  {"help", (cmd_handler)cmd_help}
+  {"help",cmd_help}
 
 
 };
@@ -262,8 +262,8 @@ void cmd_infosys(){
   printf("Arquitectura: %s\n", info.machine);
 }
 
-void cmd_help(char *command){
-    if (command == NULL){
+void cmd_help(char *trozos[]){
+    if (trozos[1] == NULL){
         puts("COMANDOS:");
         puts("  - authors: Muestra autores del programa.");
         puts("  - getpid: Muestra el PID del proceso actual.");
@@ -279,36 +279,36 @@ void cmd_help(char *command){
         puts("  - infosys: Muestra información del sistema");
         puts("  - help: Muestra lista y descripción de comandos disponibles");
         puts("  - exit: Sale del shell");
-    } else if(strcmp(command, "authors") == 0){
+    } else if(strcmp(trozos[1], "authors") == 0){
         printf("AUTHORS:  Muestra autores del programa\n  - USO: authors [-l | -n]\n");
-    } else if(strcmp(command, "getpid") == 0){
+    } else if(strcmp(trozos[1], "getpid") == 0){
         printf("GETPID:  Muestra el PID del proceso actual.\n  - USO: getpid [-p]\n");
-    } else if(strcmp(command, "chdir") == 0){
+    } else if(strcmp(trozos[1], "chdir") == 0){
         printf("CHDIR:  Cambia de directorio.\n  - USO: chdir <directorio>\n");
-    } else if(strcmp(command, "getcwd") == 0){
+    } else if(strcmp(trozos[1], "getcwd") == 0){
         printf("GETCWD:  Muestra directorio actual.\n  - USO: getcwd\n");
-    } else if(strcmp(command, "date") == 0){
+    } else if(strcmp(trozos[1], "date") == 0){
         printf("DATE:  Muestra la fecha y hora.\n  - USO: date [-d | -t]\n");
-    } else if(strcmp(command, "hours") == 0){
+    } else if(strcmp(trozos[1], "hours") == 0){
         printf("HOUR:  Muestra la hora en formato hh:mm:ss.\n  - USO: hour\n");
-    } else if(strcmp(command, "historic") == 0){
+    } else if(strcmp(trozos[1], "historic") == 0){
         printf("HISTORIC:  Muestra el historial de comandos.\n  - USO: historic [-N | -n | -clear | - count]\n");
-    } else if(strcmp(command, "open") == 0){
+    } else if(strcmp(trozos[1], "open") == 0){
         printf("OPEN:  Abre un archivo.\n  - USO: open <archivo> [modos]\n  - MODOS: cr, ap, ex, ro, rw, wo, tr\n");
-    } else if(strcmp(command, "close") == 0){
+    } else if(strcmp(trozos[1], "close") == 0){
         printf("CLOSE:  Cierra un archivo.\n  - USO: close <descriptor>\n");
-    } else if(strcmp(command, "dup") == 0){
+    } else if(strcmp(trozos[1], "dup") == 0){
         printf("DUP:  Duplica un descriptor de archivo.\n  - USO: dup <descriptor>\n");
-    } else if(strcmp(command, "listopen") == 0){
+    } else if(strcmp(trozos[1], "listopen") == 0){
         printf("LISTOPEN:  Muestra todos los archivos abiertos.\n  - USO: listopen\n");
-    } else if(strcmp(command, "infosys") == 0){
+    } else if(strcmp(trozos[1], "infosys") == 0){
         printf("INFOSYS:  Muestra información del sistema.\n  - USO: infosys\n");
-    } else if(strcmp(command, "help") == 0){
+    } else if(strcmp(trozos[1], "help") == 0){
         printf("HELP:  Muestra lista y descripción de comandos disponibles.\n  - USO: help [comando]\n");
-    } else if(strcmp(command, "exit") == 0){
+    } else if(strcmp(trozos[1], "exit") == 0){
         printf("EXIT:  Sale del shell.\n  - USO: exit | quit | bye\n");
     } else {
-        printf("Comando no encontrado: %s\n", command);
+        printf("Comando no encontrado: %s\n", trozos[1]);
     }
 }
 
