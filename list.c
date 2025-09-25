@@ -10,7 +10,6 @@ Manuel Taibo González manuel.taibo2@udc.es
 
 int TrocearCadena(char * cadena, char * trozos[])
 { int i=1;
-
   if ((trozos[0]=strtok(cadena," \n\t"))==NULL)
     return 0;
   while ((trozos[i]=strtok(NULL," \n\t"))!=NULL)
@@ -93,7 +92,7 @@ void AgregarArchivo(ListaArchivos *lista, const char *nombre, int descriptor, in
         aux->siguiente = nuevoNodo;
     }
 
-    //printf("Archivo agregado: Descriptor: %d, Nombre: %s, Modo: %d\n", descriptor, nombre, modo);
+    
 }
 
 void ImprimirComandos(Lista lista) {
@@ -186,14 +185,11 @@ void ListarFicherosAbiertos(ListaArchivos *lista){
   	printf("Lista no inicializada\n");
     return;
   }
-
   NodoArchivo* aux = lista->primero;
-
   if (aux == NULL) {
 	printf("No hay archivos abiertos\n");
     return;
   }
-
   printf("Archivos abiertos:\n");
   while (aux != NULL) {
     printf("Descriptor: %d, Nombre: %s, Modo: %d\n",
@@ -221,7 +217,7 @@ void EliminarDeFicherosAbiertos (ListaArchivos *lista, int descriptor){
 
   free(aux->nombre);
   free(aux);
-  //printf("El archivo con descriptor %d ha sido eliminado\n", descriptor);
+  
 }
 
 char* NombreFicheroDescriptor(int descriptor, ListaArchivos *lista){
