@@ -6,7 +6,7 @@ CC = gcc
 CFLAGS = -Wall -g
 SRCS = p0.c list.c
 OBJS = $(SRCS:.c=.o)
-TARGET = sheel
+TARGET = shell
 
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS)
@@ -19,4 +19,3 @@ clean:
 
 clean_obj:
 	rm -f $(OBJS)
-
