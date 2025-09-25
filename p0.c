@@ -1,3 +1,4 @@
+
 /*
 Antón Vázquez López anton.vazquez.lopez@udc.es
 Manuel Taibo González manuel.taibo2@udc.es
@@ -38,7 +39,7 @@ cmd_definition commands[] = {
   {"date", cmd_date},
   {"hour", cmd_hour},
   {"historic",(cmd_handler)cmd_historic},
-  {"open", (cmd_handler)cmd_open},      //REVISAR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  {"open", (cmd_handler)cmd_open},      
   {"close", (cmd_handler)cmd_close},
   {"dup", (cmd_handler)cmd_dup},
   {"listopen", (cmd_handler)cmd_listopen},
@@ -48,8 +49,8 @@ cmd_definition commands[] = {
 
 };
 
-int n_commands = sizeof(commands) / sizeof(cmd_definition);  //tambien vale sizeof(commands[0] pero igual accedes a algo que no existe;
-//int n_commands = sizeof(commands) / sizeof(commands[0]);
+int n_commands = sizeof(commands) / sizeof(cmd_definition);  
+
 
 void processInput (char* tokens[]){
   bool found = false;
@@ -68,24 +69,43 @@ void processInput (char* tokens[]){
 
 
 //funciones P0
-void cmd_authors (char* trozos[]){
-  //print("Authors ejecutado\n");
-  if (trozos[1] == NULL){
-  printf("Antón Vázquez López anton.vazquez.lopez@udc.es\nManuel Taibo González manuel.taibo2@udc.es\n");
-    }else if (strcmp(trozos[1], "-l") == 0){
-      printf("Logins: anton.vazquez.lopez@udc.es, manuel.taibo2@udc.es\n");
-    }else if(strcmp(trozos[1], "-n") == 0){
-      printf("Nombres: Antón Vázquez López, Manuel Taibo González\n");
-    } else{
-      printf("Opción no válida para 'authors'.\n");
+void cmd_authors(char* trozos[]) {
+    if (trozos[1] == NULL) {
+        // Sin argumentos: imprime nombres y logins
+        printf("Antón Vázquez López anton.vazquez.lopez@udc.es\n");
+        printf("Manuel Taibo González manuel.taibo2@udc.es\n");
+    } 
+    else if (strcmp(trozos[1], "-l") == 0) {
+        // Solo logins
+        if (trozos[2] != NULL) { // Si hay más argumentos, error
+            printf("Opción no válida para 'authors'.\n");
+            return;
+        }
+        printf("Logins: anton.vazquez.lopez@udc.es, manuel.taibo2@udc.es\n");
+    } 
+    else if (strcmp(trozos[1], "-n") == 0) {
+        // Solo nombres
+        if (trozos[2] != NULL) { // Si hay más argumentos, error
+            printf("Opción no válida para 'authors'.\n");
+            return;
+        }
+        printf("Nombres: Antón Vázquez López, Manuel Taibo González\n");
+    } 
+    else {
+        // Argumento desconocido
+        printf("Opción no válida para 'authors'.\n");
     }
-  }
+}
 
 void cmd_getpid ( char* trozos[]){
   if (trozos[1] == NULL){
     pid_t pid = getpid();
     printf("Identificador proceso: %d\n", pid);
   } else if (strcmp(trozos[1], "-p") == 0){
+        if (trozos[2] != NULL) { // Si hay más argumentos, error
+            printf("Opción no válida para 'getpid'.\n");
+            return;
+        }
     pid_t pid = getppid();
     printf("Identificador proceso padre: %d\n", pid);
   } else {
@@ -104,19 +124,19 @@ void cmd_getcwd ( char* trozos[]){
   }
 }
 
-void cmd_chdir ( char* trozos[]){
-  //char dir[MAX_TOKENS];
-
-  if (trozos[1] == NULL){
-    cmd_getcwd(trozos);
-  } else if (trozos[1] != NULL) {
-    chdir(trozos[1]);
-    printf("Se ha cambiado el directorio actual a: %s\n", trozos[1]);
-  } else {
-    printf("Opción no válida para 'chdir'.\n");
-  }
+void cmd_chdir(char* trozos[]) {
+    if (trozos[1] == NULL) {
+        // Sin argumentos → mostrar cwd actual
+        cmd_getcwd(trozos);
+    } else {
+        // Intentar cambiar de directorio
+        if (chdir(trozos[1]) == 0) {
+            printf("Se ha cambiado el directorio actual a: %s\n", trozos[1]);
+        } else {
+            perror("chdir"); // Muestra el error del sistema
+        }
+    }
 }
-
 void cmd_date (char* trozos[]){
     time_t aux;
     struct tm *Fjunta;
@@ -131,12 +151,14 @@ void cmd_date (char* trozos[]){
 
     if (trozos[1] == NULL){
         printf("Fecha: %s\n", fecha);
-    printf("Hora: %s\n", hora);
+        printf("Hora: %s\n", hora);
     } else if(strcmp(trozos[1], "-d") == 0){
     printf("Fecha: %s\n", fecha);
     } else if(strcmp(trozos[1], "-t") == 0){
     printf("Hora: %s\n", hora);
-    }
+    } else {
+        printf("Opcion no valida para 'date'.\n");
+        }
 }
 
 void cmd_hour(char *trozos[]){
@@ -145,73 +167,125 @@ void cmd_hour(char *trozos[]){
   char hora[9];
 
   strftime(hora, sizeof(hora), "%H:%M:%S", Fjunta);
-  printf("Hora: %s\n", hora);
+  if (trozos[1] == NULL) {
+        printf("Hora: %s\n", hora);
+    } else {
+        printf("Opción no válida para 'hour'.\n");
+    }
 }
 
 void cmd_historic(Lista *lista, char *trozos[]) {
     if (trozos[1] == NULL) {
-        // Caso: historic -> imprimir todos
+        // Caso: historic -> imprime todos
         ImprimirComandos(*lista);
-    } else if (strcmp(trozos[1], "-count") == 0) {
+        return;
+    }
+    // caso -count
+    if (strcmp(trozos[1], "-count") == 0) {
         printf("Número de comandos en histórico: %d\n", lista->tamaño);
-    } else if (strcmp(trozos[1], "-clear") == 0) {
+        return;
+    }
+    // caso -clear
+    if (strcmp(trozos[1], "-clear") == 0) {
         LiberarLista(lista);
         printf("Histórico borrado.\n");
-    } else {
-        int n = atoi(trozos[1]);
-        if (n >= 0) {
-            // historic N -> repetir el comando número N
-            ImprimirComandoN(*lista, n-1); // -1 porque la lista empieza en 0
+        return;
+    }
+    // convertimos a número
+    char *endptr;
+    int aux = strtol(trozos[1], &endptr, 10);
+
+    if (*endptr != '\0') {
+        // No era un número válido
+        printf("Opción no válida para 'historic': %s\n", trozos[1]);
+        return;
+    }
+    if (aux > 0) {
+        // caso historic N 
+        if (aux > lista->tamaño) {
+            printf("No existe el comando con número %d\n", aux);
         } else {
-            // historic -N -> imprimir últimos N comandos
-            ImprimirComandoMN(*lista, -n);
+            ImprimirComandoN(*lista, aux - 1); // -1 porque la lista empieza en 0
         }
+    } else if (aux < 0) {
+        // caso historic -N 
+        aux = abs(aux);
+        if (aux > lista->tamaño) {
+            printf("No se han escrito %d comandos\n", aux);
+        } else {
+            ImprimirComandoMN(*lista, aux);
+        }
+    } else {
+        printf("Opción no válida para 'historic': %s\n", trozos[1]);
     }
 }
+void cmd_open(char *trozos[], ListaArchivos *lista) {
+    int mode = 0, df;
 
-void cmd_open(char * trozos[], ListaArchivos *lista){
-  int mode=0, df;
+    if (trozos[1] == NULL) {
+        ListarFicherosAbiertos(lista);
+        return;
+    }
 
-  if (trozos[1] == NULL){
-    ListarFicherosAbiertos(lista);
-    return;
-  }
+    if (trozos[2] == NULL) {
+        printf("Error: falta el modo de apertura (cr, ex, ro, wo, rw, ap, tr)\n");
+        return;
+    }
 
-  for (int i = 2; trozos[i] != NULL; i++){
-    if (!strcmp(trozos[i], "cr")) mode |= O_CREAT;
-    else if (!strcmp(trozos[i], "ex")) mode |= O_EXCL;
-    else if (!strcmp(trozos[i], "ro")) mode |= O_RDONLY;
-    else if (!strcmp(trozos[i], "wo")) mode |= O_WRONLY;
-    else if (!strcmp(trozos[i], "rw")) mode |= O_RDWR;
-    else if (!strcmp(trozos[i], "ap")) mode |= O_APPEND;
-    else if (!strcmp(trozos[i], "tr")) mode |= O_TRUNC;
-    else break;
-  }
+    if (!strcmp(trozos[2], "cr")) mode = O_CREAT;  
+    else if (!strcmp(trozos[2], "ex")) mode = O_EXCL; 
+    else if (!strcmp(trozos[2], "ro")) mode = O_RDONLY;
+    else if (!strcmp(trozos[2], "wo")) mode = O_WRONLY;
+    else if (!strcmp(trozos[2], "rw")) mode = O_RDWR;
+    else if (!strcmp(trozos[2], "ap")) mode = O_APPEND; 
+    else if (!strcmp(trozos[2], "tr")) mode = O_TRUNC;
+    else {
+        printf("Error: modo inválido '%s'\n", trozos[2]);
+        return;
+    }
 
-  df = open(trozos[1], mode, 0666);
-  if (df == -1){
-    printf("Error al abrir el archivo\n");
-    return;
-  }
+    df = open(trozos[1], mode, 0666);
+    if (df == -1) {
+        perror("Error al abrir el archivo");
+        return;
+    }
 
-  AgregarArchivo(lista, trozos[1], df, mode);
-  printf("Archivo abierto: %s, Descriptor: %d\n", trozos[1], df);
-
+    AgregarArchivo(lista, trozos[1], df, mode);
+    printf("Archivo abierto: %s, Descriptor: %d\n", trozos[1], df);
 }
 
 void cmd_close(char *trozos[], ListaArchivos *lista){
-  int df = atoi(trozos[1]);
-
-  if (trozos[1] == NULL || df<0){
-    ListarFicherosAbiertos(lista);
-    return;
-  }
-
-  if (close(df) == -1) printf("Error al cerrar el archivo\n");
-  else {
+  if (trozos[1] == NULL){
+        // Si no hay argumento, muestra archivos abiertos
+        ListarFicherosAbiertos(lista);
+        return;
+    }
+    int df = atoi(trozos[1]);
+    if (df < 0){
+        printf("Descriptor inválido.\n");
+        return;
+    }
+    // Comprobar si el descriptor existe en la lista
+    NodoArchivo *aux = lista->primero;
+    bool encontrado = false;
+    while (aux != NULL){
+        if (aux->descriptor == df){
+            encontrado = true;
+            break;
+        }
+       aux = aux->siguiente;
+    }
+    if (!encontrado){
+        printf("No existe archivo con descriptor %d\n", df);
+        return;
+    }
+    // Cerrar descriptor y eliminar de la lista
+    if (close(df) == -1){
+        printf("Error al cerrar el archivo\n");
+        return;
+    }
     EliminarDeFicherosAbiertos(lista, df);
     printf("Archivo con descriptor %d cerrado correctamente\n", df);
-  }
 }
 
 void cmd_dup(char *trozos[], ListaArchivos *lista) {
@@ -229,14 +303,12 @@ void cmd_dup(char *trozos[], ListaArchivos *lista) {
     printf("Error al duplicar el archivo\n");
     return;
   }
-
   nombre = NombreFicheroDescriptor(df, lista);
   if (nombre == NULL){
     printf("No se encontró el archivo con descriptor: %d\n", df);
     close(copia);
     return;
   }
-
   sprintf(aux, "dup %d (%s)", df, nombre);
   AgregarArchivo(lista, aux, copia, 0);
   printf("Archivo con descriptor: %d  duplicado correctamente\n", copia);
@@ -247,7 +319,13 @@ void cmd_listopen(ListaArchivos *lista){
   ListarFicherosAbiertos(lista);
 }
 
-void cmd_infosys(){
+void cmd_infosys(char *trozos[]){
+   if (trozos[1] != NULL) {
+        printf("Opción no válida para 'infosys'.\n");
+        return;
+    }
+    
+    
   struct utsname info;
   if (uname(&info) == -1){
     printf("Error al obtener información del sistema\n");
