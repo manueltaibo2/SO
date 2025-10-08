@@ -14,7 +14,7 @@ Manuel Taibo González manuel.taibo2@udc.es
 #include <sys/utsname.h>
 
 #include "list.h"
-#include "p0.h"
+#include "p1.h"
 
 #define MAX_INPUT 1024
 #define MAX_TOKENS 256
@@ -320,7 +320,9 @@ void cmd_dup(char *trozos[]) {
 }
 
 void cmd_listopen(char *trozos[]){
-  if(listaArchivos.primero==NULL) return;
+  if(listaArchivos.primero==NULL) 
+  printf("No hay archivos abiertos.\n");
+  return;
   ListarFicherosAbiertos(&listaArchivos);
 }
 
