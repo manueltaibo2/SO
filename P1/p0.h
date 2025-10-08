@@ -16,11 +16,11 @@ void cmd_chdir ( char* trozos[]);
 void cmd_exit (char* trozos[]);
 void cmd_date (char* trozos[]);
 void cmd_hour(char *trozos[]);
-void cmd_historic(Lista *lista, char *trozos[]);
-void cmd_open (char * trozos[], ListaArchivos *lista);
-void cmd_close (char * trozos[], ListaArchivos *lista);
-void cmd_dup(char *trozos[], ListaArchivos *lista);
-void cmd_listopen(ListaArchivos *lista);
+void cmd_historic(char *trozos[]);
+void cmd_open (char * trozos[]);
+void cmd_close (char * trozos[]);
+void cmd_dup(char *trozos[]);
+void cmd_listopen(char *trozos[]);
 void cmd_infosys(char *trozos[]);
 void cmd_help(char *trozos[]);
 

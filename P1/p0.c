@@ -23,6 +23,11 @@ Manuel Taibo González manuel.taibo2@udc.es
 //
 typedef void (*cmd_handler)(char*[]);
 
+Lista listaComandos;
+ListaArchivos listaArchivos;
+
+
+
 typedef struct{
   char* cmd_name;
   cmd_handler handler;
@@ -174,20 +179,20 @@ void cmd_hour(char *trozos[]){
     }
 }
 
-void cmd_historic(Lista *lista, char *trozos[]) {
+void cmd_historic(char *trozos[]) {
     if (trozos[1] == NULL) {
         // Caso: historic -> imprime todos
-        ImprimirComandos(*lista);
+        ImprimirComandos(listaComandos);
         return;
     }
     // caso -count
     if (strcmp(trozos[1], "-count") == 0) {
-        printf("Número de comandos en histórico: %d\n", lista->tamaño);
+        printf("Número de comandos en histórico: %d\n", listaComandos.tamaño);
         return;
     }
     // caso -clear
     if (strcmp(trozos[1], "-clear") == 0) {
-        LiberarLista(lista);
+        LiberarLista(&listaComandos);
         printf("Histórico borrado.\n");
         return;
     }
@@ -202,28 +207,28 @@ void cmd_historic(Lista *lista, char *trozos[]) {
     }
     if (aux > 0) {
         // caso historic N 
-        if (aux > lista->tamaño) {
+        if (aux > listaComandos.tamaño) {
             printf("No existe el comando con número %d\n", aux);
         } else {
-            ImprimirComandoN(*lista, aux - 1); // -1 porque la lista empieza en 0
+            ImprimirComandoN(listaComandos, aux - 1); // -1 porque la lista empieza en 0
         }
     } else if (aux < 0) {
         // caso historic -N 
         aux = abs(aux);
-        if (aux > lista->tamaño) {
+        if (aux > listaComandos.tamaño) {
             printf("No se han escrito %d comandos\n", aux);
         } else {
-            ImprimirComandoMN(*lista, aux);
+            ImprimirComandoMN(listaComandos, aux);
         }
     } else {
         printf("Opción no válida para 'historic': %s\n", trozos[1]);
     }
 }
-void cmd_open(char *trozos[], ListaArchivos *lista) {
+void cmd_open(char *trozos[]) {
     int mode = 0, df;
 
     if (trozos[1] == NULL) {
-        ListarFicherosAbiertos(lista);
+        ListarFicherosAbiertos(&listaArchivos);
         return;
     }
 
@@ -250,14 +255,14 @@ void cmd_open(char *trozos[], ListaArchivos *lista) {
         return;
     }
 
-    AgregarArchivo(lista, trozos[1], df, mode);
+    AgregarArchivo(&listaArchivos, trozos[1], df, mode);
     printf("Archivo abierto: %s, Descriptor: %d\n", trozos[1], df);
 }
 
-void cmd_close(char *trozos[], ListaArchivos *lista){
+void cmd_close(char *trozos[]){
   if (trozos[1] == NULL){
         // Si no hay argumento, muestra archivos abiertos
-        ListarFicherosAbiertos(lista);
+        ListarFicherosAbiertos(&listaArchivos);
         return;
     }
     int df = atoi(trozos[1]);
@@ -266,7 +271,7 @@ void cmd_close(char *trozos[], ListaArchivos *lista){
         return;
     }
     // Comprobar si el descriptor existe en la lista
-    NodoArchivo *aux = lista->primero;
+    NodoArchivo *aux = listaArchivos.primero;
     bool encontrado = false;
     while (aux != NULL){
         if (aux->descriptor == df){
@@ -284,17 +289,17 @@ void cmd_close(char *trozos[], ListaArchivos *lista){
         printf("Error al cerrar el archivo\n");
         return;
     }
-    EliminarDeFicherosAbiertos(lista, df);
+    EliminarDeFicherosAbiertos(&listaArchivos, df);
     printf("Archivo con descriptor %d cerrado correctamente\n", df);
 }
 
-void cmd_dup(char *trozos[], ListaArchivos *lista) {
+void cmd_dup(char *trozos[]) {
   int df, copia;
   char *nombre;
   char aux[MAX_TOKENS];
 
   if (trozos[1] == NULL || (df=atoi(trozos[1]))<0){
-    ListarFicherosAbiertos(lista);
+    ListarFicherosAbiertos(&listaArchivos);
     return;
   }
 
@@ -303,20 +308,20 @@ void cmd_dup(char *trozos[], ListaArchivos *lista) {
     printf("Error al duplicar el archivo\n");
     return;
   }
-  nombre = NombreFicheroDescriptor(df, lista);
+  nombre = NombreFicheroDescriptor(df, &listaArchivos);
   if (nombre == NULL){
     printf("No se encontró el archivo con descriptor: %d\n", df);
     close(copia);
     return;
   }
   sprintf(aux, "dup %d (%s)", df, nombre);
-  AgregarArchivo(lista, aux, copia, 0);
+  AgregarArchivo(&listaArchivos, aux, copia, 0);
   printf("Archivo con descriptor: %d  duplicado correctamente\n", copia);
 }
 
-void cmd_listopen(ListaArchivos *lista){
-  if(lista==NULL) return;
-  ListarFicherosAbiertos(lista);
+void cmd_listopen(char *trozos[]){
+  if(listaArchivos.primero==NULL) return;
+  ListarFicherosAbiertos(&listaArchivos);
 }
 
 void cmd_infosys(char *trozos[]){
@@ -390,7 +395,7 @@ void cmd_help(char *trozos[]){
     }
 }
 
-void cmd_exit(char* tr[]){
+void cmd_exit(char* trozos[]){
   exit(0);
   }
 
@@ -399,8 +404,6 @@ int main(){
   char* tokens[MAX_TOKENS];
   char* result;
 
-  Lista listaComandos;
-  ListaArchivos listaArchivos;
 
   InicializarLista(&listaComandos);
   InicializarListaArchivos(&listaArchivos);
@@ -418,23 +421,12 @@ int main(){
 
       // Verificar qué tipo de comando es
       if (tokens[0] != NULL) {
-        if (strcmp(tokens[0], "historic") == 0) {
-          cmd_historic(&listaComandos, tokens);
-        } else if (strcmp(tokens[0], "open") == 0) {
-          cmd_open(tokens, &listaArchivos);
-        } else if (strcmp(tokens[0], "close") == 0) {
-          cmd_close(tokens, &listaArchivos);
-        } else if (strcmp(tokens[0], "dup") == 0) {
-          cmd_dup(tokens, &listaArchivos);
-        } else if (strcmp(tokens[0], "listopen") == 0) {
-          cmd_listopen(&listaArchivos);
-        } else {
           // Comandos normales que no necesitan listaArchivos
           processInput(tokens);
         }
       }
     }
-  }
+
   LiberarLista(&listaComandos);
   LiberarListaArchivos(&listaArchivos);
   return 0;
