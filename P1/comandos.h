@@ -18,4 +18,7 @@ void cmd_infosys(char*[]);
 void cmd_help(char*[]);
 void cmd_exit(char*[]);
 
+//P1
+void cmd_create(char*[]);
+
 #endif

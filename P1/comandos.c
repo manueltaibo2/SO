@@ -6,6 +6,8 @@
 #include <fcntl.h>
 #include <stdbool.h>
 #include <sys/utsname.h>
+#include <sys/stat.h>  // Para mkdir
+#include <sys/types.h>
 
 #include "list.h"
 #include "comandos.h"
@@ -299,6 +301,7 @@ void cmd_help(char *trozos[]){
         puts("  - infosys: Muestra información del sistema");
         puts("  - help: Muestra lista y descripción de comandos disponibles");
         puts("  - exit: Sale del shell");
+        puts("  - create: Crea un archivo o directorio.");
     } else if(strcmp(trozos[1], "authors") == 0){
         printf("AUTHORS:  Muestra autores del programa\n  - USO: authors [-l | -n]\n");
     } else if(strcmp(trozos[1], "getpid") == 0){
@@ -327,6 +330,9 @@ void cmd_help(char *trozos[]){
         printf("HELP:  Muestra lista y descripción de comandos disponibles.\n  - USO: help [comando]\n");
     } else if(strcmp(trozos[1], "exit") == 0){
         printf("EXIT:  Sale del shell.\n  - USO: exit | quit | bye\n");
+    } else if(strcmp(trozos[1], "create") == 0){
+        printf("CREATE: Crea un archivo o directorio.\n");
+        printf("  - USO: create [-f] <nombre>\n  - create -f <nombre>: crea un archivo\n  - create <nombre>: crea un directorio\n");
     } else {
         printf("Comando no encontrado: %s\n", trozos[1]);
     }
@@ -335,3 +341,39 @@ void cmd_help(char *trozos[]){
 void cmd_exit(char* trozos[]){
   exit(0);
   }
+
+
+  // COMANDOS P1
+
+  void cmd_create (char* trozos[]){
+    if (trozos[1]==NULL){
+        printf("Error: falta el nombre del archivo a crear.\n");
+        printf("Uso: create [-f] <nombre_archivo>\n");
+        return;
+    }
+
+    // Caso: create -f nombre (crear archivo)
+    if (strcmp(trozos[1], "-f")==0){
+        if (trozos[2]==NULL){
+            printf("Error: falta el nombre del archivo a crear.\n");
+            printf("Uso: create [-f] <nombre_archivo>\n");
+            return;
+        }
+        
+        int fd = open(trozos[2], O_CREAT | O_EXCL, 0664);
+        if (fd == -1){
+            perror("Error al crear el archivo");
+            return;
+        }
+        close(fd);
+        printf("Archivo '%s' creado correctamente.\n", trozos[2]);
+    } 
+    // Caso: create nombre (crear directorio)
+    else {
+        if (mkdir(trozos[1], 0755) == -1){
+            perror("Error al crear el directorio");
+            return;
+        }
+        printf("Directorio '%s' creado correctamente.\n", trozos[1]);
+    }
+}

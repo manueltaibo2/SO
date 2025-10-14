@@ -44,7 +44,9 @@ cmd_definition commands[] = {
   {"dup", cmd_dup},
   {"listopen", cmd_listopen},
   {"infosys", cmd_infosys},
-  {"help",cmd_help}
+  {"help",cmd_help},
+  {"create", cmd_create},
+  
 
 };
 
