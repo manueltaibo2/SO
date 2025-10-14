@@ -309,7 +309,7 @@ void cmd_help(char *trozos[]){
         printf("GETCWD:  Muestra directorio actual.\n  - USO: getcwd\n");
     } else if(strcmp(trozos[1], "date") == 0){
         printf("DATE:  Muestra la fecha y hora.\n  - USO: date [-d | -t]\n");
-    } else if(strcmp(trozos[1], "hours") == 0){
+    } else if(strcmp(trozos[1], "hour") == 0){
         printf("HOUR:  Muestra la hora en formato hh:mm:ss.\n  - USO: hour\n");
     } else if(strcmp(trozos[1], "historic") == 0){
         printf("HISTORIC:  Muestra el historial de comandos.\n  - USO: historic [-N | -n | -clear | - count]\n");
