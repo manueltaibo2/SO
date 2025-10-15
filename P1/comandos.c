@@ -8,10 +8,12 @@
 #include <sys/utsname.h>
 #include <sys/stat.h>  // Para mkdir
 #include <sys/types.h>
+#include <dirent.h>   // Para opendir, readdir, closedir
 
 #include "list.h"
 #include "comandos.h"
 
+#define MAX_INPUT 1024
 #define MAX_TOKENS 256
 
 extern Lista listaComandos;
@@ -303,6 +305,7 @@ void cmd_help(char *trozos[]){
         puts("  - exit: Sale del shell");
         puts("  - create: Crea un archivo o directorio.");
         puts("  - erase: Borra un archivo o directorio.");
+        puts("  - delrec: Borra un archivo o directorio de forma recursiva.");
     } else if(strcmp(trozos[1], "authors") == 0){
         printf("AUTHORS:  Muestra autores del programa\n  - USO: authors [-l | -n]\n");
     } else if(strcmp(trozos[1], "getpid") == 0){
@@ -337,6 +340,9 @@ void cmd_help(char *trozos[]){
     } else if(strcmp(trozos[1], "erase") == 0){
         printf("ERASE: Elimina archivos y/o directorios vacíos.\n");
         printf("  - USO: erase <nombre1> [nombre2] [nombre3] ...\n");
+    } else if(strcmp(trozos[1], "delrec") == 0){
+        printf("DELREC: Elimina archivos y/o directorios de forma recursiva.\n");
+        printf("  - USO: delrec <nombre1> [nombre2] [nombre3] ...\n");
     } else {
         printf("Comando no encontrado: %s\n", trozos[1]);
     }
@@ -414,5 +420,71 @@ void cmd_erase (char* trozos[]){
                 printf("Archivo '%s' borrado correctamente.\n", trozos[i]);
             }
         }
+    }
+}
+
+void aux_delrec(char* path){
+    struct stat info;
+
+    if(stat(path, &info) == -1){
+        printf("'%s': ", path);
+        perror("Error");
+        return;
+    }
+
+    if(!S_ISDIR(info.st_mode)){
+        // Es un archivo
+        if(unlink(path) == -1){
+            printf("'%s': ", path);
+            perror("Error al eliminar archivo");
+        } else {
+            printf("Archivo '%s' borrado correctamente.\n", path);
+        }
+        return;
+    }
+
+    // Es un directorio
+    DIR *dir = opendir(path);
+    if(dir == NULL){
+        printf("'%s': ", path);
+        perror("Error al abrir directorio");
+        return;
+    }
+
+    struct dirent *entry;
+    char fullpath[MAX_INPUT];
+
+    //recorrer el directorio
+    while((entry = readdir(dir)) != NULL){
+        if(strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0){
+            continue; // Saltar . y ..
+        }
+
+        //construir la ruta completa
+        snprintf(fullpath, sizeof(fullpath), "%s/%s", path, entry->d_name);
+        aux_delrec(fullpath); // llamada recursiva
+    }
+
+    closedir(dir);
+
+    // Intentar eliminar el directorio ahora vacío
+    if(rmdir(path) == -1){
+        printf("'%s': ", path);
+        perror("Error al eliminar directorio");
+    } else {
+        printf("Directorio '%s' borrado correctamente.\n", path);
+    }
+
+}    
+
+void cmd_delrec(char* trozos[]){
+    if (trozos[1]==NULL){
+        printf("Error: falta el nombre del archivo o directorio a eliminar.\n");
+        printf("Uso: delrec delrec <nombre1> [nombre2] [nombre3] ...\n");
+        return;
+    }
+    
+    for (int i=1; trozos[i]!=NULL; i++){
+        aux_delrec(trozos[i]);
     }
 }

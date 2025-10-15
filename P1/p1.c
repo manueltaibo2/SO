@@ -46,7 +46,8 @@ cmd_definition commands[] = {
   {"infosys", cmd_infosys},
   {"help",cmd_help},
   {"create", cmd_create},
-  {"erase", cmd_erase}
+  {"erase", cmd_erase},
+  {"delrec", cmd_delrec}
   
 };
 
