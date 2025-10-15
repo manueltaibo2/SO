@@ -23,5 +23,6 @@ void cmd_create(char*[]);
 void cmd_erase(char*[]);
 void cmd_delrec(char*[]);
 void cmd_lseek(char*[]);
+void cmd_writestr(char*[]);
 
 #endif

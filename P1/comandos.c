@@ -13,7 +13,7 @@
 #include "list.h"
 #include "comandos.h"
 
-#define MAX_INPUT 1024
+#define BUFFER_SIZE 1024
 #define MAX_TOKENS 256
 
 extern Lista listaComandos;
@@ -459,7 +459,7 @@ void aux_delrec(char* path){
     }
 
     struct dirent *entry;
-    char fullpath[MAX_INPUT];
+    char fullpath[BUFFER_SIZE];
 
     //recorrer el directorio
     while((entry = readdir(dir)) != NULL){
@@ -550,4 +550,62 @@ void cmd_lseek(char* trozos[]){
     printf("Offset actualizado a la posición: %ld\n", nueva_pos);
 
 
+}
+
+void cmd_writestr(char* trozos[]){
+    if (trozos[1] == NULL || trozos[2] == NULL){
+        printf("Error: faltan argumentos.\n");
+        printf("Uso: writestr <descriptor> <cadena>\n");
+        return;
+    }
+
+    int df = atoi(trozos[1]);
+    if (df < 0){
+        printf("Descriptor inválido.\n");
+        return;
+    }
+
+    NodoArchivo *aux = listaArchivos.primero;
+    bool encontrado = false;
+
+    // Comprobar si el descriptor existe en la lista
+    while (aux != NULL){
+        if (aux->descriptor == df){
+            encontrado = true;
+            break;
+        }
+        aux = aux->siguiente;
+    }
+
+    // Descriptor no está en la lista
+    if (!encontrado){
+        printf("No existe archivo con descriptor %d\n", df);
+        return;
+    }
+
+    // Verificar permisos de escritura
+    if ((aux->modo != O_WRONLY) && (aux->modo != O_RDWR) && (aux->modo != O_APPEND)){
+        printf("El archivo con descriptor %d no tiene permisos de escritura.\n", df);
+        return;
+    }
+
+    // Reconstruir la cadena completa desde trozos[2]
+    char buffer[BUFFER_SIZE] = "";
+    int i = 2;
+    while (trozos[i] != NULL) {
+        strcat(buffer, trozos[i]);
+        if (trozos[i + 1] != NULL) {
+            strcat(buffer, " ");  // Espacio entre palabras
+        }
+        i++;
+    }
+
+    // Escribir cadena en el archivo
+    ssize_t bytes_escritos = write(df, buffer, strlen(buffer));
+    if (bytes_escritos == -1){
+        perror("Error al escribir en el archivo");
+        return;
+    } else {
+        printf("Se han escrito %zd bytes en el archivo con descriptor %d.\n", bytes_escritos, df);
+    }
 }
