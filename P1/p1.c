@@ -46,8 +46,8 @@ cmd_definition commands[] = {
   {"infosys", cmd_infosys},
   {"help",cmd_help},
   {"create", cmd_create},
+  {"erase", cmd_erase}
   
-
 };
 
 int n_commands = sizeof(commands) / sizeof(cmd_definition);  

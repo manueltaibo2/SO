@@ -302,6 +302,7 @@ void cmd_help(char *trozos[]){
         puts("  - help: Muestra lista y descripción de comandos disponibles");
         puts("  - exit: Sale del shell");
         puts("  - create: Crea un archivo o directorio.");
+        puts("  - erase: Borra un archivo o directorio.");
     } else if(strcmp(trozos[1], "authors") == 0){
         printf("AUTHORS:  Muestra autores del programa\n  - USO: authors [-l | -n]\n");
     } else if(strcmp(trozos[1], "getpid") == 0){
@@ -333,6 +334,9 @@ void cmd_help(char *trozos[]){
     } else if(strcmp(trozos[1], "create") == 0){
         printf("CREATE: Crea un archivo o directorio.\n");
         printf("  - USO: create [-f] <nombre>\n  - create -f <nombre>: crea un archivo\n  - create <nombre>: crea un directorio\n");
+    } else if(strcmp(trozos[1], "erase") == 0){
+        printf("ERASE: Elimina archivos y/o directorios vacíos.\n");
+        printf("  - USO: erase <nombre1> [nombre2] [nombre3] ...\n");
     } else {
         printf("Comando no encontrado: %s\n", trozos[1]);
     }
@@ -343,7 +347,7 @@ void cmd_exit(char* trozos[]){
   }
 
 
-  // COMANDOS P1
+// COMANDOS P1
 
   void cmd_create (char* trozos[]){
     if (trozos[1]==NULL){
@@ -375,5 +379,40 @@ void cmd_exit(char* trozos[]){
             return;
         }
         printf("Directorio '%s' creado correctamente.\n", trozos[1]);
+    }
+}
+
+void cmd_erase (char* trozos[]){
+    if (trozos[1]==NULL){
+        printf("Error: falta el nombre del archivo o directorio a borrar.\n");
+        printf("Uso: erase <nombres>\n");
+        return;
+    }
+    for (int i=1; trozos[i]!=NULL; i++){
+        struct stat info;
+        
+        if (stat(trozos[i], &info) == -1){
+            printf("'%s': ", trozos[i]);
+            perror("Error");
+            continue;
+        }
+        
+        if(S_ISDIR(info.st_mode)){
+            // Es un directorio
+            if (rmdir(trozos[i]) == -1){
+                printf("'%s': ", trozos[i]);
+                perror("Error al eliminar directorio");
+            } else {
+                printf("Directorio '%s' borrado correctamente.\n", trozos[i]);
+            }
+        } else {
+            // Es un archivo
+            if (unlink(trozos[i]) == -1){
+                printf("'%s': ", trozos[i]);
+                perror("Error al eliminar archivo");
+            } else {
+                printf("Archivo '%s' borrado correctamente.\n", trozos[i]);
+            }
+        }
     }
 }

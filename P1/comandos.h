@@ -20,5 +20,6 @@ void cmd_exit(char*[]);
 
 //P1
 void cmd_create(char*[]);
+void cmd_erase(char*[]);
 
 #endif
