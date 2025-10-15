@@ -80,6 +80,7 @@ void cmd_chdir(char* trozos[]) {
         }
     }
 }
+
 void cmd_date (char* trozos[]){
     time_t aux;
     struct tm *Fjunta;
@@ -162,6 +163,7 @@ void cmd_historic(char *trozos[]) {
         printf("Opción no válida para 'historic': %s\n", trozos[1]);
     }
 }
+
 void cmd_open(char *trozos[]) {
     int mode = 0, df;
 
@@ -493,7 +495,6 @@ void cmd_delrec(char* trozos[]){
         aux_delrec(trozos[i]);
     }
 }
-
 
 void cmd_lseek(char* trozos[]){
     if (trozos[1]==NULL || trozos[2]==NULL || trozos[3]==NULL){
