@@ -47,7 +47,8 @@ cmd_definition commands[] = {
   {"help",cmd_help},
   {"create", cmd_create},
   {"erase", cmd_erase},
-  {"delrec", cmd_delrec}
+  {"delrec", cmd_delrec},
+  {"lseek", cmd_lseek}
   
 };
 

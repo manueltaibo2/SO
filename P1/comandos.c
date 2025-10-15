@@ -306,6 +306,7 @@ void cmd_help(char *trozos[]){
         puts("  - create: Crea un archivo o directorio.");
         puts("  - erase: Borra un archivo o directorio.");
         puts("  - delrec: Borra un archivo o directorio de forma recursiva.");
+        puts("  - lseek: Cambia el offset de un archivo abierto.");
     } else if(strcmp(trozos[1], "authors") == 0){
         printf("AUTHORS:  Muestra autores del programa\n  - USO: authors [-l | -n]\n");
     } else if(strcmp(trozos[1], "getpid") == 0){
@@ -343,6 +344,10 @@ void cmd_help(char *trozos[]){
     } else if(strcmp(trozos[1], "delrec") == 0){
         printf("DELREC: Elimina archivos y/o directorios de forma recursiva.\n");
         printf("  - USO: delrec <nombre1> [nombre2] [nombre3] ...\n");
+    } else if(strcmp(trozos[1], "lseek") == 0){
+        printf("LSEEK: Cambia el offset de un archivo abierto.\n");
+        printf("  - USO: lseek <descriptor> <offset> <whence>\n");
+        printf("  - whence: SEEK_SET, SEEK_CUR, SEEK_END\n");
     } else {
         printf("Comando no encontrado: %s\n", trozos[1]);
     }
@@ -487,4 +492,61 @@ void cmd_delrec(char* trozos[]){
     for (int i=1; trozos[i]!=NULL; i++){
         aux_delrec(trozos[i]);
     }
+}
+
+
+void cmd_lseek(char* trozos[]){
+    if (trozos[1]==NULL || trozos[2]==NULL || trozos[3]==NULL){
+        printf("Error: falta argumentos.\n");
+        printf("Uso: lseek <descriptor> <offset> <whence>\n");
+        return;
+    }
+
+    // Convertir argumentos
+    int df = atoi(trozos[1]);
+    if (df < 0){
+        printf("Descriptor inválido.\n");
+        return; 
+    }
+    
+    long offset = atol(trozos[2]);
+    int whence;
+
+    // Determinar el valor de 'whence'
+    if (strcmp(trozos[3], "SEEK_SET") == 0) whence = SEEK_SET;
+    else if (strcmp(trozos[3], "SEEK_CUR") == 0) whence = SEEK_CUR;
+    else if (strcmp(trozos[3], "SEEK_END") == 0) whence = SEEK_END;
+    else {
+        printf("Valor inválido para 'whence'. Use SEEK_SET, SEEK_CUR o SEEK_END.\n");
+        return;
+    }
+
+    NodoArchivo *aux = listaArchivos.primero;
+    bool encontrado = false;
+
+    // Comprobar si el descriptor existe en la lista
+    while (aux != NULL){
+        if (aux->descriptor == df){
+            encontrado = true;
+            break;
+        }
+       aux = aux->siguiente;
+    }
+
+    // Descriptor no está en la lista
+    if (!encontrado){
+        printf("No existe archivo con descriptor %d\n", df);
+        return;
+    }
+
+    // Realizar lseek
+    off_t nueva_pos = lseek(df, offset, whence);
+    if (nueva_pos == (off_t)-1){
+        perror("Error en lseek");
+        return;
+    }
+
+    printf("Offset actualizado a la posición: %ld\n", nueva_pos);
+
+
 }
