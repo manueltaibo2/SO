@@ -1,4 +1,3 @@
-
 /*
 Antón Vázquez López anton.vazquez.lopez@udc.es
 Manuel Taibo González manuel.taibo2@udc.es
@@ -8,6 +7,8 @@ Manuel Taibo González manuel.taibo2@udc.es
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <fcntl.h>      // ← AÑADIR ESTA LÍNEA
+#include <unistd.h>     // ← AÑADIR ESTA LÍNEA (para fcntl también)
 #include "list.h"
 #include "p1.h"
 #include "comandos.h"
@@ -80,6 +81,15 @@ int main(){
 
   InicializarLista(&listaComandos);
   InicializarListaArchivos(&listaArchivos);
+
+  // Agregar descriptores estándar con sus modos reales
+  int modo_stdin = fcntl(0, F_GETFL);
+  int modo_stdout = fcntl(1, F_GETFL);
+  int modo_stderr = fcntl(2, F_GETFL);
+
+  AgregarArchivo(&listaArchivos, "stdin", 0, modo_stdin);
+  AgregarArchivo(&listaArchivos, "stdout", 1, modo_stdout);
+  AgregarArchivo(&listaArchivos, "stderr", 2, modo_stderr);
 
   bool finished = false;
 

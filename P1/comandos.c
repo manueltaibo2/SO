@@ -362,7 +362,7 @@ void cmd_exit(char* trozos[]){
 
 // COMANDOS P1
 
-  void cmd_create (char* trozos[]){
+void cmd_create (char* trozos[]){
     if (trozos[1]==NULL){
         printf("Error: falta el nombre del archivo a crear.\n");
         printf("Uso: create [-f] <nombre_archivo>\n");
