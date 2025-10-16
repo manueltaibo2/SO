@@ -166,6 +166,7 @@ void cmd_historic(char *trozos[]) {
 
 void cmd_open(char *trozos[]) {
     int mode = 0, df;
+    int i = 2;
 
     if (trozos[1] == NULL) {
         ListarFicherosAbiertos(&listaArchivos);
@@ -177,16 +178,20 @@ void cmd_open(char *trozos[]) {
         return;
     }
 
-    if (!strcmp(trozos[2], "cr")) mode = O_CREAT;  
-    else if (!strcmp(trozos[2], "ex")) mode = O_EXCL; 
-    else if (!strcmp(trozos[2], "ro")) mode = O_RDONLY;
-    else if (!strcmp(trozos[2], "wo")) mode = O_WRONLY;
-    else if (!strcmp(trozos[2], "rw")) mode = O_RDWR;
-    else if (!strcmp(trozos[2], "ap")) mode = O_APPEND; 
-    else if (!strcmp(trozos[2], "tr")) mode = O_TRUNC;
-    else {
-        printf("Error: modo inválido '%s'\n", trozos[2]);
-        return;
+    // Procesar TODOS los modos proporcionados
+    while (trozos[i] != NULL) {
+        if (!strcmp(trozos[i], "cr")) mode |= O_CREAT;  
+        else if (!strcmp(trozos[i], "ex")) mode |= O_EXCL; 
+        else if (!strcmp(trozos[i], "ro")) mode |= O_RDONLY;
+        else if (!strcmp(trozos[i], "wo")) mode |= O_WRONLY;
+        else if (!strcmp(trozos[i], "rw")) mode |= O_RDWR;
+        else if (!strcmp(trozos[i], "ap")) mode |= O_APPEND; 
+        else if (!strcmp(trozos[i], "tr")) mode |= O_TRUNC;
+        else {
+            printf("Error: modo inválido '%s'\n", trozos[i]);
+            return;
+        }
+        i++;
     }
 
     df = open(trozos[1], mode, 0666);
@@ -540,6 +545,12 @@ void cmd_lseek(char* trozos[]){
         return;
     }
 
+    // Verificar que no sea stdin, stdout o stderr**
+    if (df == 0 || df == 1 || df == 2){
+        printf("No se puede hacer lseek sobre descriptores estándar (stdin/stdout/stderr)\n");
+        return;
+    }
+
     // Realizar lseek
     off_t nueva_pos = lseek(df, offset, whence);
     if (nueva_pos == (off_t)-1){
@@ -548,8 +559,6 @@ void cmd_lseek(char* trozos[]){
     }
 
     printf("Offset actualizado a la posición: %ld\n", nueva_pos);
-
-
 }
 
 void cmd_writestr(char* trozos[]){
@@ -583,8 +592,9 @@ void cmd_writestr(char* trozos[]){
         return;
     }
 
-    // Verificar permisos de escritura
-    if ((aux->modo != O_WRONLY) && (aux->modo != O_RDWR) && (aux->modo != O_APPEND)){
+    int accmode = aux->modo & O_ACCMODE;  // O_ACCMODE = 0003 (máscara para extraer ro/wo/rw)
+    
+    if (accmode == O_RDONLY) {
         printf("El archivo con descriptor %d no tiene permisos de escritura.\n", df);
         return;
     }
