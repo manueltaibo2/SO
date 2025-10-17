@@ -567,7 +567,7 @@ void cmd_writestr(char* trozos[]){
         printf("Uso: writestr <descriptor> <cadena>\n");
         return;
     }
-
+    
     int df = atoi(trozos[1]);
     if (df < 0){
         printf("Descriptor inválido.\n");
@@ -592,6 +592,7 @@ void cmd_writestr(char* trozos[]){
         return;
     }
 
+    //Extraer permisos del archivo
     int accmode = aux->modo & O_ACCMODE;  // O_ACCMODE = 0003 (máscara para extraer ro/wo/rw)
     
     if (accmode == O_RDONLY) {

@@ -7,8 +7,8 @@ Manuel Taibo González manuel.taibo2@udc.es
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-#include <fcntl.h>      // ← AÑADIR ESTA LÍNEA
-#include <unistd.h>     // ← AÑADIR ESTA LÍNEA (para fcntl también)
+#include <fcntl.h>
+#include <unistd.h>
 #include "list.h"
 #include "p1.h"
 #include "comandos.h"
