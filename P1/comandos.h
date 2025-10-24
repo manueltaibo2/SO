@@ -24,5 +24,8 @@ void cmd_erase(char*[]);
 void cmd_delrec(char*[]);
 void cmd_lseek(char*[]);
 void cmd_writestr(char*[]);
+void cmd_setdirparams(char*[]);
+void cmd_getdirparams(char*[]);
+void cmd_dir(char*[]);
 
 #endif
