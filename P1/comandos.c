@@ -1,3 +1,7 @@
+/*
+Antón Vázquez López anton.vazquez.lopez@udc.es
+Manuel Taibo González manuel.taibo2@udc.es
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,7 +16,6 @@
 #include <sys/stat.h>  // Para mkdir
 #include <sys/types.h>
 #include <dirent.h>   // Para opendir, readdir, closedir
-
 
 #ifndef PATH_MAX
 #define PATH_MAX 4096
@@ -587,28 +590,28 @@ void cmd_lseek(char* trozos[]){
 }
 
 void cmd_writestr(char* trozos[]){
-    if (trozos[1] == NULL || trozos[2] == NULL){
+    if (trozos[1]==NULL || trozos[2]==NULL){
         printf("Error: faltan argumentos.\n");
         printf("Uso: writestr <descriptor> <cadena>\n");
         return;
     }
     
-    int df = atoi(trozos[1]);
-    if (df < 0){
+    int df=atoi(trozos[1]);
+    if (df<3){    // Evitar stdin, stdout, stderr
         printf("Descriptor inválido.\n");
         return;
     }
 
-    NodoArchivo *aux = listaArchivos.primero;
-    bool encontrado = false;
+    NodoArchivo *nodo= listaArchivos.primero;
+    bool encontrado= false;
 
-    // Compruebo  si el descriptor existe en la lista
-    while (aux != NULL){
-        if (aux->descriptor == df){
+    // Comprobar si el descriptor existe en la lista
+    while (nodo != NULL){
+        if (nodo->descriptor == df){
             encontrado = true;
             break;
         }
-        aux = aux->siguiente;
+        nodo= nodo->siguiente;
     }
 
     // El descriptor no está en la lista
@@ -618,30 +621,28 @@ void cmd_writestr(char* trozos[]){
     }
 
     //Extraer permisos del archivo
-    int accmode = aux->modo & O_ACCMODE;  // O_ACCMODE = 0003 (máscara para extraer ro/wo/rw)
-    
-    if (accmode == O_RDONLY) {
+    int perm_acc= nodo->modo & O_ACCMODE;  // O_ACCMODE = 0003 (máscara para extraer ro/wo/rw)
+    if (perm_acc==O_RDONLY){
         printf("El archivo con descriptor %d no tiene permisos de escritura.\n", df);
         return;
     }
 
     // Reconstruir la cadena completa desde trozos[2]
-    char buffer[BUFFER_SIZE] = "";
-    int i = 2;
-    while (trozos[i] != NULL) {
-        strcat(buffer, trozos[i]);
-        if (trozos[i + 1] != NULL) {
-            strcat(buffer, " ");  // Espacio entre palabras
-        }
-        i++;
+    char cadena[BUFFER_SIZE]= "";
+    int i= 2;
+    while (trozos[i]!=NULL){
+        strcat(cadena, trozos[i]);
+        if (trozos[i + 1]!=NULL){
+            strcat(cadena, " ");  // Espacio entre palabras
+        } i++;
     }
 
     // Escribir cadena en el archivo
-    ssize_t bytes_escritos = write(df, buffer, strlen(buffer));
-    if (bytes_escritos == -1){
+    ssize_t bytes_escritos= write(df, cadena, strlen(cadena));
+    if (bytes_escritos==-1){
         perror("Error al escribir en el archivo");
         return;
-    } else {
+    } else{
         printf("Se han escrito %zd bytes en el archivo con descriptor %d.\n", bytes_escritos, df);
     }
 }
@@ -721,6 +722,7 @@ void cmd_getdirparams(char *trozos[]) {
     else
         printf("\n");
 }
+
 void listarArchivo(char *nombre) {
     struct stat s;
     if (lstat(nombre, &s) == -1) {
@@ -775,7 +777,7 @@ void listarArchivo(char *nombre) {
 }
 
 void listarDirectorio(const char *nombre) {
-   DIR *dir;
+    DIR *dir;
     struct dirent *entry;
 
     dir = opendir(nombre);
@@ -818,7 +820,6 @@ void listarDirectorio(const char *nombre) {
         if (EsDirectorio(ruta))
             listarDirectorio(ruta);
     }
-
     closedir(dir);
 }
 

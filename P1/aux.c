@@ -1,3 +1,8 @@
+/*
+Antón Vázquez López anton.vazquez.lopez@udc.es
+Manuel Taibo González manuel.taibo2@udc.es
+*/
+
 #define _XOPEN_SOURCE 700
 #include "aux.h"
 #include <sys/sysmacros.h>
