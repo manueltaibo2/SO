@@ -50,7 +50,7 @@ cmd_definition commands[] = {
   {"erase", cmd_erase},
   {"delrec", cmd_delrec},
   {"lseek", cmd_lseek},
-  {"writestr", cmd_writestr}
+  {"writestr", cmd_writestr},
   {"setdirparams", cmd_setdirparams},
   {"getdirparams", cmd_getdirparams},
   {"dir", cmd_dir}
