@@ -51,6 +51,9 @@ cmd_definition commands[] = {
   {"delrec", cmd_delrec},
   {"lseek", cmd_lseek},
   {"writestr", cmd_writestr}
+  {"setdirparams", cmd_setdirparams},
+  {"getdirparams", cmd_getdirparams},
+  {"dir", cmd_dir}
   
 };
 
