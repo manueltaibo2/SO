@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -5,13 +6,21 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdbool.h>
+#include <pwd.h>
+#include <grp.h>
 #include <sys/utsname.h>
 #include <sys/stat.h>  // Para mkdir
 #include <sys/types.h>
 #include <dirent.h>   // Para opendir, readdir, closedir
 
+
+#ifndef PATH_MAX
+#define PATH_MAX 4096
+#endif
+
 #include "list.h"
 #include "comandos.h"
+#include "aux.h"
 
 #define BUFFER_SIZE 1024
 #define MAX_TOKENS 256
@@ -294,28 +303,32 @@ void cmd_infosys(char *trozos[]){
 }
 
 void cmd_help(char *trozos[]){
-    if (trozos[1] == NULL){
+     if (trozos[1] == NULL){
         puts("COMANDOS:");
         puts("  - authors: Muestra autores del programa.");
         puts("  - getpid: Muestra el PID del proceso actual.");
         puts("  - chdir: Cambia de directorio.");
         puts("  - getcwd: Muestra directorio actual.");
         puts("  - date: Muestra la fecha y hora.");
-        puts("	- hour: Muestra la hora en formato hh:mm:ss.");
+        puts("  - hour: Muestra la hora en formato hh:mm:ss.");
         puts("  - historic: Muestra el historial de comandos.");
         puts("  - open: Abre un archivo.");
         puts("  - close: Cierra un archivo.");
         puts("  - dup: Duplica un archivo.");
-        puts("  - listopen: Muestra todos los archivos abiertos");
-        puts("  - infosys: Muestra información del sistema");
-        puts("  - help: Muestra lista y descripción de comandos disponibles");
-        puts("  - exit: Sale del shell");
+        puts("  - listopen: Muestra todos los archivos abiertos.");
+        puts("  - infosys: Muestra información del sistema.");
+        puts("  - help: Muestra lista y descripción de comandos disponibles.");
+        puts("  - exit: Sale del shell.");
         puts("  - create: Crea un archivo o directorio.");
         puts("  - erase: Borra un archivo o directorio.");
         puts("  - delrec: Borra un archivo o directorio de forma recursiva.");
         puts("  - lseek: Cambia el offset de un archivo abierto.");
-    } else if(strcmp(trozos[1], "authors") == 0){
-        printf("AUTHORS:  Muestra autores del programa\n  - USO: authors [-l | -n]\n");
+        puts("  - dir: Lista archivos y directorios.");
+        puts("  - setdirparams: Configura los parámetros del comando dir.");
+        puts("  - getdirparams: Muestra el estado actual de los parámetros de dir.");
+    } 
+    else if(strcmp(trozos[1], "authors") == 0){
+        printf("AUTHORS:  Muestra autores del programa.\n  - USO: authors [-l | -n]\n");
     } else if(strcmp(trozos[1], "getpid") == 0){
         printf("GETPID:  Muestra el PID del proceso actual.\n  - USO: getpid [-p]\n");
     } else if(strcmp(trozos[1], "chdir") == 0){
@@ -327,7 +340,7 @@ void cmd_help(char *trozos[]){
     } else if(strcmp(trozos[1], "hour") == 0){
         printf("HOUR:  Muestra la hora en formato hh:mm:ss.\n  - USO: hour\n");
     } else if(strcmp(trozos[1], "historic") == 0){
-        printf("HISTORIC:  Muestra el historial de comandos.\n  - USO: historic [-N | -n | -clear | - count]\n");
+        printf("HISTORIC:  Muestra el historial de comandos.\n  - USO: historic [-N | -n | -clear | -count]\n");
     } else if(strcmp(trozos[1], "open") == 0){
         printf("OPEN:  Abre un archivo.\n  - USO: open <archivo> [modos]\n  - MODOS: cr, ap, ex, ro, rw, wo, tr\n");
     } else if(strcmp(trozos[1], "close") == 0){
@@ -355,6 +368,18 @@ void cmd_help(char *trozos[]){
         printf("LSEEK: Cambia el offset de un archivo abierto.\n");
         printf("  - USO: lseek <descriptor> <offset> <whence>\n");
         printf("  - whence: SEEK_SET, SEEK_CUR, SEEK_END\n");
+    } else if(strcmp(trozos[1], "dir") == 0){
+        printf("DIR: Lista archivos y directorios.\n");
+        printf("  - USO: dir [-d] [nombre1] [nombre2] ...\n");
+        printf("  - Sin argumentos: lista el directorio actual.\n");
+        printf("  - Con -d: lista el contenido del directorio.\n");
+    } else if(strcmp(trozos[1], "setdirparams") == 0){
+        printf("SETDIRPARAMS: Configura los parámetros del comando dir.\n");
+        printf("  - USO: setdirparams [long|short] [link|nolink] [hid|nohid] [reca|recb|norec]\n");
+        printf("  - Permite establecer varios parámetros en una misma llamada.\n");
+    } else if(strcmp(trozos[1], "getdirparams") == 0){
+        printf("GETDIRPARAMS: Muestra el estado actual de los parámetros de 'dir'.\n");
+        printf("  - USO: getdirparams\n");
     } else {
         printf("Comando no encontrado: %s\n", trozos[1]);
     }
@@ -577,7 +602,7 @@ void cmd_writestr(char* trozos[]){
     NodoArchivo *aux = listaArchivos.primero;
     bool encontrado = false;
 
-    // Comprobar si el descriptor existe en la lista
+    // Compruebo  si el descriptor existe en la lista
     while (aux != NULL){
         if (aux->descriptor == df){
             encontrado = true;
@@ -586,7 +611,7 @@ void cmd_writestr(char* trozos[]){
         aux = aux->siguiente;
     }
 
-    // Descriptor no está en la lista
+    // El descriptor no está en la lista
     if (!encontrado){
         printf("No existe archivo con descriptor %d\n", df);
         return;
@@ -618,5 +643,210 @@ void cmd_writestr(char* trozos[]){
         return;
     } else {
         printf("Se han escrito %zd bytes en el archivo con descriptor %d.\n", bytes_escritos, df);
+    }
+}
+
+void cmd_setdirparams(char *trozos[]) {
+    if (trozos[1] == NULL) {
+        printf("Uso: setdirparams <long|short> <link|nolink> <hid|nohid> <reca|recb|norec>\n");
+        return;
+    }
+
+    for (int i = 1; trozos[i] != NULL; i++) {
+        if (strcmp(trozos[i], "long") == 0)
+            dirParams.longFormat = 1;
+        else if (strcmp(trozos[i], "short") == 0)
+            dirParams.longFormat = 0;
+
+        else if (strcmp(trozos[i], "link") == 0)
+            dirParams.showLinks = 1;
+        else if (strcmp(trozos[i], "nolink") == 0)
+            dirParams.showLinks = 0;
+
+        else if (strcmp(trozos[i], "hid") == 0)
+            dirParams.showHidden = 1;
+        else if (strcmp(trozos[i], "nohid") == 0)
+            dirParams.showHidden = 0;
+
+        else if (strcmp(trozos[i], "reca") == 0)
+            dirParams.recursion = 1;
+        else if (strcmp(trozos[i], "recb") == 0)
+            dirParams.recursion = 2;
+        else if (strcmp(trozos[i], "norec") == 0)
+            dirParams.recursion = 0;
+
+        else {
+            printf("Parámetro desconocido: %s\n", trozos[i]);
+        }
+    }
+    
+}
+
+void cmd_getdirparams(char *trozos[]) {
+    if (trozos[1] != NULL) {
+        printf("Opción no válida para 'getdirparams'.\n");
+        return;
+    }
+
+    printf("Listado: ");
+
+    // Formato largo/corto
+    if (dirParams.longFormat)
+        printf("largo ");
+    else
+        printf("corto ");
+
+    // Links
+    if (dirParams.showLinks)
+        printf("con links ");
+    else
+        printf("sin links ");
+
+    // Recursividad
+    switch (dirParams.recursion) {
+        case 1:
+            printf("recursivo (despues) ");
+            break;
+        case 2:
+            printf("recursivo (antes) ");
+            break;
+        default:
+            printf("no recursivo ");
+            break;
+    }
+
+    // Ficheros ocultos
+    if (dirParams.showHidden)
+        printf("con ficheros ocultos\n");
+    else
+        printf("\n");
+}
+void listarArchivo(char *nombre) {
+    struct stat s;
+    if (lstat(nombre, &s) == -1) {
+        perror("Error al obtener información del archivo");
+        return;
+    }
+
+    // Oculto archivos ocultos si no se piden que se muestren
+    char *base = strrchr(nombre, '/');
+    base = (base) ? base + 1 : nombre;
+    if (!dirParams.showHidden && base[0] == '.')
+        return;
+
+    if (dirParams.longFormat) {
+        // Información de usuario y grupo
+        struct passwd *pw = getpwuid(s.st_uid);
+        struct group  *gr = getgrgid(s.st_gid);
+
+        // Fecha
+        struct tm *t = localtime(&s.st_mtime);
+        char fecha[20];
+        strftime(fecha, sizeof(fecha), "%Y/%m/%d-%H:%M", t);
+
+        // Permisos
+        char *permisos = ConvierteModo2(s.st_mode);
+
+        printf("%s   %lu (%lu)    %s    %s %s %5ld %s",
+               fecha,
+               s.st_nlink,
+               s.st_ino,
+               pw ? pw->pw_name : "???",
+               gr ? gr->gr_name : "???",
+               permisos,
+               s.st_size,
+               base);
+
+        // Enlaces simbólicos
+        if (dirParams.showLinks && S_ISLNK(s.st_mode)) {
+            char destino[PATH_MAX];
+            ssize_t len = readlink(nombre, destino, sizeof(destino) - 1);
+            if (len != -1) {
+                destino[len] = '\0';
+                printf(" -> %s", destino);
+            }
+        }
+
+        printf("\n");
+    } else {
+        // Formato corto
+        printf("%ld  %s \n", s.st_size, base);
+    }
+}
+
+void listarDirectorio(const char *nombre) {
+   DIR *dir;
+    struct dirent *entry;
+
+    dir = opendir(nombre);
+    if (!dir) {
+        perror("Error al abrir directorio");
+        return;
+    }
+
+    printf("************%s\n", nombre);
+
+    //  listamos los archivos del directorio actual
+    while ((entry = readdir(dir)) != NULL) {
+        // Saltamos los ocultos si no deben mostrarse
+        if (!dirParams.showHidden && entry->d_name[0] == '.')
+            continue;
+
+        char ruta[PATH_MAX];
+        snprintf(ruta, sizeof(ruta), "%s/%s", nombre, entry->d_name);
+
+        // Mostrar archivos y directorios (pero no recursivamente )
+        listarArchivo(ruta);
+    }
+
+    closedir(dir);
+
+    // recorremos recursivamente los subdirectorios
+    dir = opendir(nombre);
+    if (!dir) return;
+
+    while ((entry = readdir(dir)) != NULL) {
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+            continue;
+
+        if (!dirParams.showHidden && entry->d_name[0] == '.')
+            continue;
+
+        char ruta[PATH_MAX];
+        snprintf(ruta, sizeof(ruta), "%s/%s", nombre, entry->d_name);
+
+        if (EsDirectorio(ruta))
+            listarDirectorio(ruta);
+    }
+
+    closedir(dir);
+}
+
+void cmd_dir(char *trozos[]) {
+     int listarContenido = 0;
+    int startIndex = 1;
+
+    // Si no hay argumentos, lista el directorio actual
+    if (trozos[1] == NULL) {
+        listarArchivo(".");
+        return;
+    }
+
+    // Si el primer argumento es "-d", entonces lista el contenido de los directorios
+    if (strcmp(trozos[1], "-d") == 0) {
+        listarContenido = 1;
+        startIndex = 2;
+    }
+
+    // Recorremos todos los argumentos
+    for (int i = startIndex; trozos[i] != NULL; i++) {
+        if (EsDirectorio(trozos[i])) {
+            if (listarContenido)
+                listarDirectorio(trozos[i]);   // Si hay -d listamos su contenido
+            else
+                listarArchivo(trozos[i]);      // Sin -d mostramos  solo la info del directorio
+        } else {
+            listarArchivo(trozos[i]);          // Es un archivo normal
+        }
     }
 }
