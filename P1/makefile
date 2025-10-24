@@ -3,7 +3,7 @@
 
 CC = gcc
 CFLAGS = -Wall -g
-SRCS = p1.c comandos.c list.c
+SRCS = p1.c comandos.c list.c aux.c
 OBJS = $(SRCS:.c=.o)
 TARGET = a.out
 
